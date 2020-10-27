@@ -1,7 +1,7 @@
 var questionObject = [
     {question:"Commonly use data type Do Not Include", 
     choices: ["Strings", "Booleans","Alerts","Numbers"] , 
-    answer: 2},//Position of where the correct answer is in the array
+    answer: 2},
     {question:"What is the name of the variable that has a scope of the entire script?", 
     choices: ["World Variable", "Var","Local Variable","Global Variable"] , 
     answer: 3},
@@ -25,7 +25,7 @@ var score = 0;
 var buttonArray = new Array();
 
 
-console.log(amountofQuestions);
+$('#timerContainer').hide();
 
 document.getElementById("startButton").addEventListener("click", function(event){
 
@@ -36,11 +36,13 @@ document.getElementById("startButton").addEventListener("click", function(event)
        document.getElementById("questionText").setAttribute('class',"");
         $('#startButton').hide();
         $('#instructions').hide();
-        // $('#instructions').attr('class',"hide");
-        // $('#questionsText').attr('class',"");
+        $('#timerContainer').show();
+
+     
         
         
         getQuestions();
+        startTimer();
         
 });
 
@@ -52,8 +54,7 @@ function getQuestions(){
     questionGoingToBeAsked.text(questionObject[currentQuestionIndex].question + ": ");
     console.log(buttonArray);
     if(buttonArray.length >0){
-        //We know there's something in the array
-        //console.log("Buttons are already populated");
+        
             for(var choice in currentQuestionObj.choices){
                 var currentPossibleAnswer = currentQuestionObj.choices[choice];
                 buttonArray[choice].textContent = currentPossibleAnswer;
@@ -81,11 +82,11 @@ function getQuestions(){
                     getQuestions();
                 }else{
                     if(this.getAttribute('answer') == this.getAttribute('id')){
-                        console.log("Answer is the same as this button");
+                        
                         score+=10;
                     }
-                    console.log(currentQuestionIndex);
-                    console.log("Reached the last question");
+                   
+                    
                     populateBanner();
                 }
                 
@@ -95,9 +96,10 @@ function getQuestions(){
             btn.textContent = t;
             buttonArray[choice] = btn;
         }
-    
+        //var answerList = $('possibleAnswerList');
+        var answerList = document.getElementById('possibleAnswerList');
          for(var i in buttonArray){
-             document.body.appendChild(buttonArray[i]);
+             answerList.appendChild(buttonArray[i]);
         }
 
     }
@@ -120,6 +122,124 @@ function getQuestions(){
         //This function will get the points addup from all the correct ones.
         //We'll give the user 5 seconds per question, for each second in the timer after a correct answer the user will get an additional 0.2 points, 
     }
+
+
+
+
+
+    function getFormattedMinutes() {
+        //
+        var secondsLeft = totalSeconds - secondsElapsed;
+      
+        var minutesLeft = Math.floor(secondsLeft / 60);
+      
+        var formattedMinutes;
+      
+        if (minutesLeft < 10) {
+          formattedMinutes = "0" + minutesLeft;
+        } else {
+          formattedMinutes = minutesLeft;
+        }
+      
+        return formattedMinutes;
+      }
+      
+      function getFormattedSeconds() {
+        var secondsLeft = (totalSeconds - secondsElapsed) % 60;
+      
+        var formattedSeconds;
+      
+        if (secondsLeft < 10) {
+          formattedSeconds = "0" + secondsLeft;
+        } else {
+          formattedSeconds = secondsLeft;
+        }
+      
+        return formattedSeconds;
+      }
+
+
+
+/* This function retrieves the values from the html input elements; Sort of
+   getting run in the background, it sets the totalSeconds variable which
+   is used in getFormattedMinutes/Seconds() and the renderTime() function.
+   It essentially resets our timer */
+   function setTime() {
+    var minutes;
+  
+    if (status === "Working") {
+      minutes = workMinutesInput.value.trim();
+    } else {
+      minutes = restMinutesInput.value.trim();
+    }
+  
+    clearInterval(interval);
+    totalSeconds = minutes * 60;
+  }
+
+  // This function does 2 things. displays the time and checks to see if time is up.
+function renderTime() {
+    // When renderTime is called it sets the textContent for the timer html...
+    minutesDisplay.textContent = getFormattedMinutes();
+    secondsDisplay.textContent = getFormattedSeconds();
+  
+   // ..and then checks to see if the time has run out
+    if (secondsElapsed >= totalSeconds) {
+      if (status === "Working") {
+        alert("Time for a break!");
+      } else {
+        alert("Time to get back to work!");
+      }
+  
+      stopTimer();
+    }
+  }
+
+  // This function is where the "time" aspect of the timer runs
+// Notice no settings are changed other than to increment the secondsElapsed var
+function startTimer() {
+    setTime();
+  
+    // We only want to start the timer if totalSeconds is > 0
+    if (totalSeconds > 0) {
+      /* The "interval" variable here using "setInterval()" begins the recurring increment of the
+         secondsElapsed variable which is used to check if the time is up */
+        interval = setInterval(function() {
+          secondsElapsed++;
+  
+          // So renderTime() is called here once every second.
+          renderTime();
+        }, 1000);
+    } else {
+      alert("Minutes of work/rest must be greater than 0.")
+    }
+  }
+
+  function stopTimer() {
+    secondsElapsed = 0;
+    setTime();
+    renderTime();
+  }
+
+  /* Our timer is fancy enough to handle 2 different settings at once this toggle
+   function basically just specifies which of our 2 timer settings to use. */
+function toggleStatus(event) {
+    var checked = event.target.checked;
+  
+    if (checked) {
+      status = "Working";
+    } else {
+      status = "Resting";
+    }
+  
+    statusSpan.textContent = status;
+  
+    secondsElapsed = 0;
+    setTime();
+    renderTime();
+  }
+  
+
 
 
 }
